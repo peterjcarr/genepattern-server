@@ -3196,12 +3196,31 @@ function createJobWidget(job) {
     $("#menus-jobs").append(widget);
 }
 
+// Save the scroll position before the page is unloaded
+window.addEventListener('beforeunload', function() {
+    var scrollPosition = $("#left-nav-jobs-list").scrollTop();
+    if (scrollPosition !== null){
+		localStorage.setItem('leftNavJobsListScrollPosition', scrollPosition);
+	}
+    
+});
+
+// Restore the scroll position when the page is loaded
+window.addEventListener('DOMContentLoaded', function() {
+    var scrollPosition = localStorage.getItem('leftNavJobsListScrollPosition');
+    if (scrollPosition !== null) {
+        $("#left-nav-jobs-list").scrollTop(scrollPosition);
+    }
+});
+
 function initRecentJobs() {
     // Init the refresh button
     $("#left-nav-jobs-refresh").button().click(function() {
         initRecentJobs();
     });
-
+    // Save the current scroll position
+    var scrollPosition = $("#left-nav-jobs-list").scrollTop();
+    
     // Init the jobs
     $.ajax({
         cache: false,
@@ -3236,7 +3255,14 @@ function initRecentJobs() {
             if (recentJobs.length === 0) {
                 tab.append("<h3 style='text-align:center;'>No Recent Jobs</h3>");
             }
-
+            // Restore the scroll position
+            var savedScrollPosition = localStorage.getItem('leftNavJobsListScrollPosition');
+            if (savedScrollPosition !== null) {
+                var maxScrollPosition = tab[0].scrollHeight - tab.height();
+                tab.scrollTop(Math.min(savedScrollPosition, maxScrollPosition));
+            }
+            
+            
             // Update the Job Status Indicators
             var jobsProcessing = data.numProcessingJobs;
             var statusBoxes = $(".current-job-status a");
@@ -3268,26 +3294,32 @@ function initRecentJobs() {
 }
 
 function toggleJobCollapse(toggleImg) {
-    $(toggleImg).closest(".job-box").find(".job-details").toggle("blind");
-    var open = $(toggleImg).attr("src").indexOf("arrow-pipelinetask-down.gif") >= 0;
-    if (open) {
-        $(toggleImg).attr("src", "/gp/images/arrow-pipelinetask-right.gif")
-    }
-    else {
-        $(toggleImg).attr("src", "/gp/images/arrow-pipelinetask-down.gif")
+    var jobBox = $(toggleImg).closest(".job-box");
+    var jobId = jobBox.data("job-id");
+    var jobDetails = jobBox.find(".job-details");
+    var isOpen = jobDetails.is(":visible");
+
+    jobDetails.toggle("blind");
+    if (isOpen) {
+        $(toggleImg).attr("src", "/gp/images/arrow-pipelinetask-right.gif");
+        localStorage.setItem("jobCollapseState_" + jobId, "collapsed");
+    } else {
+        $(toggleImg).attr("src", "/gp/images/arrow-pipelinetask-down.gif");
+        localStorage.setItem("jobCollapseState_" + jobId, "expanded");
     }
 }
 
 function renderJob(jobJson, tab) {
     var jobBox = $("<div></div>")
         .addClass("job-box")
+        .data("job-id", jobJson.jobId)
         .appendTo(tab);
 
     var jobName = $("<div></div>")
         .addClass("job-name")
         .appendTo(jobBox);
 
-    $("<img />")
+     var toggleImg = $("<img />")
         .attr("src", "/gp/images/arrow-pipelinetask-down.gif")
         .attr("onclick", "toggleJobCollapse(this);")
         .appendTo(jobName);
@@ -3314,6 +3346,12 @@ function renderJob(jobJson, tab) {
     )
         .append(jobJson.datetime)
         .appendTo(jobBox);
+
+	var collapseState = localStorage.getItem("jobCollapseState_" + jobJson.jobId);
+    if (collapseState === "collapsed") {
+          toggleJobCollapse(toggleImg[0]);
+    }
+
 
     //noinspection JSDuplicatedDeclaration
     for (var j = 0; j < jobJson.outputFiles.length; j++) {
