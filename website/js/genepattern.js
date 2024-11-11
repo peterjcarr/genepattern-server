@@ -3309,6 +3309,28 @@ function toggleJobCollapse(toggleImg) {
     }
 }
 
+
+	
+function getJobNameText(jobJson) {
+    var jobNameText = jobJson.jobId + ". ";
+    var taskName = jobJson.taskName;
+
+    if (jobJson.tags && Array.isArray(jobJson.tags)) {
+        for (var i = 0; i < jobJson.tags.length; i++) {
+			tagContent = jobJson.tags[i].tag.tag;
+            var tag = tagContent.toLowerCase();
+            if (tagContent.startsWith("name=") || tagContent.startsWith("jobname=")) {
+                taskName =tagContent.split("=")[1];
+                break;
+            }
+        }
+    }
+
+    jobNameText += taskName + " ";
+    return jobNameText;
+}
+
+
 function renderJob(jobJson, tab) {
     var jobBox = $("<div></div>")
         .addClass("job-box")
@@ -3324,12 +3346,15 @@ function renderJob(jobJson, tab) {
         .attr("onclick", "toggleJobCollapse(this);")
         .appendTo(jobName);
 
+	jobNameHover = jobJson.jobId + ". " + jobJson.taskName + " ";
+	jobNameText = getJobNameText(jobJson);
+	
     $("<a></a>")
         .attr("href", "/gp/jobResults/" + jobJson.jobId + "/")
         .attr("onclick", "openJobWidget(this); return false;")
         .attr("data-jobid", jobJson.jobId)
         .attr("data-json", JSON.stringify(jobJson))
-        .text(jobJson.jobId + ". " + jobJson.taskName + " ")
+        .text(jobNameText + " ")
         .append(
         $("<span></span>")
             .attr("class", "glyphicon glyphicon-info-sign")
@@ -3346,6 +3371,10 @@ function renderJob(jobJson, tab) {
     )
         .append(jobJson.datetime)
         .appendTo(jobBox);
+        
+    if (jobNameHover != jobNameText) {
+		jobDetails.prepend($("<div></div>").text(jobJson.taskName).addClass("job-name-subtitle"));
+	}
 
 	var collapseState = localStorage.getItem("jobCollapseState_" + jobJson.jobId);
     if (collapseState === "collapsed") {
