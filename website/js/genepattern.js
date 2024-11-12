@@ -3330,6 +3330,19 @@ function getJobNameText(jobJson) {
     return jobNameText;
 }
 
+function getJobNameTextExtended(jobJson) {
+	var taskName = jobJson.taskName;
+	var jobName = getJobNameText(jobJson);
+	console.log("T-->"+taskName+"<--");
+	console.log("J-->"+jobName+"<--");
+	if (!jobName.trim().endsWith(taskName.trim())){
+		jobName = jobName + "("+ taskName + ")";
+	}
+	return jobName;
+}
+
+
+
 
 function renderJob(jobJson, tab) {
     var jobBox = $("<div></div>")
@@ -3783,7 +3796,7 @@ function populateJobResultsTable(settings, callback) {
                 .attr("onclick", "openJobWidget(this); return false;")
                 .attr("data-jobid", job.jobId)
                 .attr("data-json", JSON.stringify(job))
-                .text(" " + job.taskName + " ")
+                .text(" " + getJobNameTextExtended(job) + " ")
                 .append(
                 $("<span></span>")
                     .attr("class", "glyphicon glyphicon-info-sign")
