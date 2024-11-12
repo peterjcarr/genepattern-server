@@ -326,15 +326,22 @@
                     });
                 }
 
+
+               
+                
                 function attachMenus() {
                     var data = $("#main-pane").data("job-status-" + currentJobNumber);
-
+					
                     if (data !== null && data !== undefined) {
                         // Initialize the job link
+                      
+                        window.tedsjson=data;
+                        
                         var jobLink = $(".jobresult-job");
                         jobLink.attr("data-jobid", data.jobId);
                         jobLink.attr("data-json", JSON.stringify(data));
-
+                        jobLink.attr("data-taskname",  data.taskName);
+                        window.tedsjson=data;
                         // Initialize the job output files
                         for (var i = 0; i < data.outputFiles.length; i++) {
                             var file = data.outputFiles[i];
@@ -476,7 +483,7 @@
                                     id="jobTable#{jobStatusBean.jobInfo.jobNumber}">
                                     <tr>
                                         <td class="title">#{jobStatusBean.jobInfo.jobNumber}.
-                                            <a class="jobresult-job" href="#" onclick="openJobWidget(this); return false;">#{jobStatusBean.jobInfo.truncatedTaskName} <span class="glyphicon glyphicon-info-sign" style="text-indent: 0px;"></span></a>
+                                            <a class="jobresult-job" href="#" onclick="openJobWidget(this); return false;" id="jobresult-job-title">#{jobStatusBean.jobInfo.truncatedTaskName} <span class="glyphicon glyphicon-info-sign" style="text-indent: 0px;"></span></a>
                                             <script type="text/javascript">
                                                 // Attach the menus
                                                 attachMenus();

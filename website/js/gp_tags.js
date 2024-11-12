@@ -5,6 +5,7 @@ function updateTagsTotal()
 {
     var totalTags = Object.keys(jobTagToIdMap).length;
     $("#tagHeaderTotal").empty().append("(" +  totalTags + ")");
+    updateJobName();
 }
 
 function addTag(tag)
@@ -145,6 +146,7 @@ $(function() {
                 {
                     $("#tagsContent").find("input").last().focus();
                 }
+                updateJobName(response.tags)
             }
         },
         dataType: "json",
@@ -216,3 +218,48 @@ $(function() {
         $.removeCookie("show_tags_focus"+currentJobNumber);
     });
 });
+
+
+ 
+function updateJobName() {
+    // Initialize the job link
+    var jobLink = $(".jobresult-job");
+    // Cache the old value
+    var oldValue = jobLink.text();
+
+    // Update the job name if a tag starting with name= or jobname= is found
+    var taskName = "";
+    for (var tag in jobTagToIdMap) {
+        if (tag.toLowerCase().startsWith("name=") || tag.toLowerCase().startsWith("jobname=")) {
+            taskName = tag.split("=")[1];
+            break;
+        }
+    }
+   
+    // Find the parent TR element of the jobLink
+    var parentTR = jobLink.closest("tr");
+    var existingTR = parentTR.next(".cached-job-name");
+
+ 	if (taskName != "") {
+    	  jobLink.text(taskName);
+		  if (existingTR.length == 0) {
+			    var newTR = $("<tr class='cached-job-name'></tr>");
+			    var newTD = $("<td style='padding-left:24px; font-weight:bold;'></td>").attr("colspan", parentTR.children("td").length).text(oldValue);
+			    newTR.append(newTD);	
+			    // Insert the new TR immediately below the parent TR
+			    parentTR.after(newTR);
+		  }
+    } else {
+		jobLink.text(jobLink.attr("data-taskname"));
+		if (existingTR.length > 0) {
+            existingTR.remove();
+        }
+       
+    }
+
+	// update the recent jobs list so it is also correct
+    initRecentJobs();
+   
+}
+
+
