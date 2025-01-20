@@ -29,14 +29,16 @@ MINICONDA2_HOME=/Users/liefeld/AnacondaProjects/CondaInstall/anaconda3/
 export PATH="${PATH}:${MINICONDA2_HOME}/bin:/Users/liefeld/AnacondaProjects/CondaInstall/anaconda3/envs/ame/bin/"
 # export PATH=$PATH:/Users/liefeld/ana_conda_4/anaconda/envs/awscli/bin:/Applications/OpenCRAVAT.app/Contents/Resources/launchers:/Users/liefeld/.sdkman/candidates/grails/current/bin:/Users/liefeld/ana_conda_4/anaconda/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/liefeld/tools/ant/apache-ant-1.10.1/bin
 
+export PATH=/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Users/liefeld/.rvm/bin:/Users/liefeld/GenePattern/ant/apache-ant-1.10.1/bin:/usr/local/opt/python@3.11/libexec/bin/
+
 
 echo $PATH > ~/path.txt
 
 # -u  aws-cli/1.11.87
 #source activate awscli
 # accidentally named the conda env "ame" with -name instead of --name
-source activate base
-
+#source activate base
+. ~/.zshrc
 
 # set AWS_PROFILE if not already set
 : ${AWS_PROFILE=genepattern}
