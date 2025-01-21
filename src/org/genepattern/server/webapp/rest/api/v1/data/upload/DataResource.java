@@ -45,6 +45,7 @@ import org.genepattern.server.config.GpContext;
 import org.genepattern.server.config.ServerConfigurationFactory;
 import org.genepattern.server.database.HibernateSessionManager;
 import org.genepattern.server.database.HibernateUtil;
+import org.genepattern.server.dm.ExternalFileManager;
 import org.genepattern.server.dm.GpDirectoryNode;
 import org.genepattern.server.dm.GpFileObjFactory;
 import org.genepattern.server.dm.GpFilePath;
@@ -986,7 +987,17 @@ public class DataResource {
         }
         // and if there is an externalFileManager in play, lets push that up
         // to the external file system
-        
+        try {
+            ExternalFileManager externalFileManager = DataManager.getExternalFileManager(jobContext);
+            
+            if (externalFileManager != null)
+                externalFileManager.syncLocalFileToRemote(jobContext, gpResultFilePath.getServerFile(), true);   
+            
+        }
+        catch (Throwable e) {
+            log.error("Error sync-ing file from local to S3, filename=" + gpResultFilePath.getRelativePath(), e);
+            // don't throw an error, this should still be OK as long as there is disk space
+        }
         
         return gpResultFilePath;
     }
