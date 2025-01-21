@@ -192,7 +192,7 @@ public class DataResource {
      * 
      * Example usage:
      * <pre>
-       curl -u test:test -X POST --data-binary @all_aml_test.cls http://127.0.0.1:8080/gp/rest/v1/data/upload/job_output?name=all_aml_test.cls&job_id=12345
+       curl -u test:test -X POST --data-binary @all_aml_test.cls "http://127.0.0.1:8080/gp/rest/v1/data/upload/job_output?name=all_aml_test.cls&job_id=12345"
      * </pre>
      * 
      * @param request
@@ -212,8 +212,7 @@ public class DataResource {
             final InputStream in)
     {
         try { 
-            System.out.println("\n\n==== URI " + uriInfo.getQueryParameters());
-            
+                       
             Integer job_id = null;
             try {
                 job_id = Integer.parseInt(job_id_str);
@@ -973,7 +972,7 @@ public class DataResource {
                         Response.status(Response.Status.NOT_FOUND).entity("Job not found").build());
             }
            AnalysisJob theJob= dao.getAnalysisJob(jobInfo.getJobNumber());
-           addFileToOutputParameters(jobInfo2, filename, null);
+           addFileToOutputParameters(jobInfo2, filename, filename);
            dao.updateJob(jobInfo.getJobNumber(), jobInfo2.getParameterInfo(), theJob.getJobStatus().getStatusId());
             
             if (!isInTransaction) {
@@ -985,6 +984,9 @@ public class DataResource {
             throw new WebApplicationException(
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
         }
+        // and if there is an externalFileManager in play, lets push that up
+        // to the external file system
+        
         
         return gpResultFilePath;
     }
@@ -1005,6 +1007,7 @@ public class DataResource {
             if (params[i].isOutputFile()){
                 if (params[i].getName().equals(label) && params[i].getValue().equals(fileName)){
                     // don't add it again
+                    params[i] = paramOut;
                     return;
                 }
             }
